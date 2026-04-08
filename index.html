@@ -1,63 +1,560 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-<meta charset="UTF-8">
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<title>Gradient PRO</title>
-<style>
-body{
-    font-family:sans-serif;
-    background:#0b0f1a;
-    color:white;
-    text-align:center;
-    padding:30px;
-}
-button{
-    padding:15px 20px;
-    border:none;
-    border-radius:12px;
-    background:linear-gradient(90deg,#6366f1,#a855f7);
-    color:white;
-    font-size:16px;
-    cursor:pointer;
-}
-.pro{
-    margin-top:30px;
-    padding:20px;
-    border-radius:20px;
-    background:rgba(255,255,255,0.05);
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Физика — Билеты для подготовки</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --bg-soft: #111a2e;
+      --card: #17233d;
+      --text: #e8ecf6;
+      --muted: #a9b4ca;
+      --primary: #6d8bff;
+      --primary-2: #8f6dff;
+      --border: rgba(255, 255, 255, 0.12);
+      --ok: #3ddc97;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+    }
+
+    [data-theme="light"] {
+      --bg: #f3f6fb;
+      --bg-soft: #e9eef8;
+      --card: #ffffff;
+      --text: #15213b;
+      --muted: #5b6782;
+      --primary: #3a63ff;
+      --primary-2: #7b3cff;
+      --border: rgba(21, 33, 59, 0.12);
+      --ok: #0f9d5e;
+      --shadow: 0 12px 30px rgba(22, 33, 64, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(circle at 10% 0%, rgba(109, 139, 255, 0.15), transparent 30%),
+        radial-gradient(circle at 90% 10%, rgba(143, 109, 255, 0.14), transparent 26%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      transition: background-color .25s ease, color .25s ease;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 20px;
+    }
+
+    .panel {
+      background: color-mix(in srgb, var(--card), transparent 8%);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 20px;
+      max-height: calc(100dvh - 40px);
+      overflow: auto;
+      padding: 18px;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 1.45rem;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      margin: 8px 0 14px;
+      color: var(--muted);
+      font-size: .95rem;
+    }
+
+    .controls {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .input,
+    .btn,
+    .ticket-link,
+    .checkbox {
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--bg-soft);
+      color: var(--text);
+      font: inherit;
+    }
+
+    .input {
+      width: 100%;
+      padding: 12px 14px;
+      outline: none;
+    }
+
+    .input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary), transparent 75%);
+    }
+
+    .btn {
+      padding: 11px 14px;
+      cursor: pointer;
+      transition: transform .15s ease, background-color .15s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn.primary {
+      border: none;
+      background: linear-gradient(130deg, var(--primary), var(--primary-2));
+      color: white;
+      font-weight: 600;
+    }
+
+    .progress {
+      margin: 10px 0 16px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      font-size: .92rem;
+      color: var(--muted);
+    }
+
+    .bar {
+      flex: 1;
+      height: 8px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--bg-soft), transparent 20%);
+      overflow: hidden;
+    }
+
+    .bar > span {
+      display: block;
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      background: linear-gradient(130deg, var(--primary), var(--ok));
+      transition: width .25s ease;
+    }
+
+    .ticket-nav {
+      display: grid;
+      gap: 8px;
+    }
+
+    .ticket-link {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 10px 12px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: border-color .15s ease, transform .15s ease;
+    }
+
+    .ticket-link:hover,
+    .ticket-link.active {
+      border-color: var(--primary);
+      transform: translateX(2px);
+    }
+
+    .content {
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .hero {
+      padding: 18px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: linear-gradient(140deg,
+          color-mix(in srgb, var(--primary), transparent 88%),
+          color-mix(in srgb, var(--primary-2), transparent 90%));
+    }
+
+    .hero h2 {
+      margin: 0 0 8px;
+      font-size: 1.35rem;
+    }
+
+    .tickets {
+      display: grid;
+      gap: 12px;
+    }
+
+    details.ticket {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--card);
+      overflow: hidden;
+    }
+
+    details.ticket[open] {
+      border-color: color-mix(in srgb, var(--primary), white 10%);
+    }
+
+    summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+
+    .ticket-meta {
+      font-size: .84rem;
+      color: var(--muted);
+      margin-left: auto;
+    }
+
+    .ticket-body {
+      border-top: 1px solid var(--border);
+      padding: 14px;
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    .ticket-body ul {
+      margin: 8px 0 0;
+      padding-left: 18px;
+    }
+
+    .ticket-body li { margin-bottom: 8px; }
+
+    .learned {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: .9rem;
+      user-select: none;
+      cursor: pointer;
+    }
+
+    .checkbox {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--ok);
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 960px) {
+      .container { grid-template-columns: 1fr; }
+      .sidebar {
+        position: static;
+        max-height: none;
+      }
+    }
+  </style>
 </head>
 <body>
+  <main class="container">
+    <aside class="panel sidebar">
+      <h1 class="title">📘 Билеты по физике</h1>
+      <p class="subtitle">Удобно повторяй темы, отмечай выученное и фильтруй материал.</p>
 
-<h2>🎨 Gradient Studio</h2>
+      <div class="controls">
+        <input id="search" class="input" type="search" placeholder="Поиск по темам: поле, линзы, Ома..." />
+        <button id="themeBtn" class="btn">🌓 Переключить тему</button>
+        <button id="openAll" class="btn">Развернуть все</button>
+        <button id="closeAll" class="btn">Свернуть все</button>
+      </div>
 
-<div id="status">Free Version</div>
+      <div class="progress">
+        <div class="bar"><span id="progressFill"></span></div>
+        <strong id="progressText">0%</strong>
+      </div>
 
-<div class="pro">
-    <h3>🚀 Upgrade to PRO</h3>
-    <p>5 colors, animation, 4K export</p>
-    <button onclick="buyPro()">Buy PRO ($5 USDT)</button>
-</div>
+      <nav id="ticketNav" class="ticket-nav"></nav>
+    </aside>
 
-<script>
-const tg = window.Telegram.WebApp;
-tg.expand();
+    <section class="panel content">
+      <div class="hero">
+        <h2>Подготовка к экзамену без хаоса</h2>
+        <p>Собранные билеты в одном месте: тёмная/светлая тема, адаптация под телефон и ноутбук, быстрый поиск и отметки прогресса.</p>
+      </div>
 
-async function buyPro(){
-    const res = await fetch("/create-invoice", {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({
-            user_id: tg.initDataUnsafe.user.id
-        })
+      <div id="tickets" class="tickets"></div>
+    </section>
+  </main>
+
+  <script>
+    const ticketsData = [
+      {
+        id: 1,
+        title: "Электрическое поле",
+        tags: ["заряд", "поле", "напряженность", "напряжение"],
+        points: [
+          "Заряды взаимодействуют через электрическое поле, а не напрямую.",
+          "Поле — особая форма материи: у него нет массы, объёма, формы как у вещества.",
+          "Напряжённость: E = F/q, показывает силу на единичный положительный заряд.",
+          "Напряжение — работа поля при переносе единичного положительного заряда: U = A/q.",
+          "Силовые линии показывают направление поля и его «густоту» (величину E)."
+        ]
+      },
+      {
+        id: 2,
+        title: "Напряжённость, сила, напряжение, работа",
+        tags: ["E", "F=qE", "работа", "потенциал"],
+        points: [
+          "Сила на заряд в поле: F = qE (направление зависит от знака заряда).",
+          "Напряжённость зависит от источника поля, не зависит от пробного заряда.",
+          "Напряжение между точками не зависит от переносимого q, а от поля и положения точек.",
+          "Работа поля совершается при перемещении между точками с разным потенциалом.",
+          "Если движение по эквипотенциальной поверхности или U = 0, работа не совершается."
+        ]
+      },
+      {
+        id: 3,
+        title: "Энергия поля. Конденсатор",
+        tags: ["конденсатор", "ёмкость", "энергия"],
+        points: [
+          "Конденсатор накапливает заряд и энергию электрического поля.",
+          "Простейший конденсатор: две пластины, разделённые диэлектриком.",
+          "Электроёмкость: C = q/U.",
+          "Ёмкость зависит от площади пластин, расстояния между ними и диэлектрика.",
+          "Применения: вспышки, фильтры, цепи радиоэлектроники."
+        ]
+      },
+      {
+        id: 4,
+        title: "Заряд. Закон сохранения. Закон Кулона",
+        tags: ["заряд", "кулон", "сохранение"],
+        points: [
+          "Электрический заряд — мера участия тел в электровзаимодействиях (Кл).",
+          "Заряды бывают положительные и отрицательные; одноимённые отталкиваются.",
+          "Закон сохранения: в изолированной системе суммарный заряд постоянен.",
+          "Закон Кулона: F пропорциональна q1q2 и обратно пропорциональна r².",
+          "Электризация: трением, соприкосновением, влиянием."
+        ]
+      },
+      {
+        id: 5,
+        title: "Проводники и диэлектрики",
+        tags: ["индукция", "экранирование", "диэлектрик"],
+        points: [
+          "В металлах есть свободные электроны, поэтому они проводят ток.",
+          "Внутри проводника в электростатике поле равно нулю.",
+          "Электризация влиянием: заряд можно получить без контакта (с заземлением).",
+          "Диэлектрики поляризуются в поле, ослабляя его.",
+          "В диэлектрике сила Кулона меньше, чем в вакууме."
+        ]
+      },
+      {
+        id: 6,
+        title: "Магнитное поле и магнитная индукция",
+        tags: ["магнит", "индукция", "силовые линии"],
+        points: [
+          "Магнитное поле создаётся движущимися зарядами (током).",
+          "Вектор магнитной индукции B — силовая характеристика поля.",
+          "Направление B определяют по магнитной стрелке или правилу буравчика.",
+          "Линии магнитного поля замкнуты и не пересекаются.",
+          "Свойства среды учитываются магнитной проницаемостью μ."
+        ]
+      },
+      {
+        id: 7,
+        title: "Сила Ампера. Рамка с током",
+        tags: ["сила ампера", "левая рука", "двигатель"],
+        points: [
+          "На проводник с током в магнитном поле действует сила Ампера.",
+          "Формула: F = B·I·l·sinα.",
+          "Направление определяют по правилу левой руки.",
+          "На рамку с током действует вращающий момент.",
+          "Применения: гальванометр, электродвигатель."
+        ]
+      },
+      {
+        id: 8,
+        title: "Электромагнитная индукция. Правило Ленца",
+        tags: ["фарадей", "поток", "ленц", "генератор"],
+        points: [
+          "Индукционный ток возникает при изменении магнитного потока через контур.",
+          "Магнитный поток: Φ = B·S·cosα.",
+          "ЭДС индукции: ε = -ΔΦ/Δt.",
+          "Правило Ленца: индукционный ток противодействует причине своего появления.",
+          "Применения: генератор переменного тока, трансформатор."
+        ]
+      },
+      {
+        id: 9,
+        title: "Самоиндукция. Энергия магнитного поля",
+        tags: ["самоиндукция", "катушка"],
+        points: [
+          "При изменении тока в катушке возникает ЭДС самоиндукции.",
+          "Катушка препятствует резкому изменению силы тока.",
+          "Магнитное поле обладает энергией.",
+          "При размыкании мощных цепей возможно искрение.",
+          "Примеры: системы зажигания, импульсные схемы."
+        ]
+      },
+      {
+        id: 10,
+        title: "Постоянный и переменный ток. Закон Ома",
+        tags: ["ом", "ток", "сопротивление"],
+        points: [
+          "Ток — упорядоченное движение зарядов.",
+          "Постоянный ток: направление и величина не меняются.",
+          "Переменный ток: периодически меняется по величине и направлению.",
+          "Закон Ома: I = U/R.",
+          "Сопротивление: R = ρ·l/S."
+        ]
+      },
+      { id: 11, title: "Соединение проводников", tags: ["последовательное", "параллельное"], points: ["Добавь сюда свои формулы и правила по билету 11."] },
+      {
+        id: 12,
+        title: "Работа и мощность тока. Закон Джоуля–Ленца",
+        tags: ["мощность", "джоуль", "ленц"],
+        points: [
+          "Работа тока: A = U·I·t.",
+          "Мощность: P = U·I = I²R = U²/R.",
+          "Количество теплоты: Q = I²R·t.",
+          "Электроэнергия в быту измеряется в кВт·ч.",
+          "Нагрев зависит от схемы соединения и сопротивления приборов."
+        ]
+      },
+      { id: 13, title: "Производство и передача электроэнергии", tags: ["гэс", "тэс", "аэс", "потери"], points: ["Типы электростанций: ГЭС, ТЭС, АЭС.", "Передача на дальние расстояния ведётся при высоком напряжении для уменьшения потерь.", "Важны экологические последствия каждого способа генерации."] },
+      { id: 14, title: "Прямолинейное распространение света", tags: ["тень", "затмение"], points: ["Свет в однородной среде распространяется прямолинейно.", "Доказательства: тень, полутень, солнечные и лунные затмения."] },
+      { id: 15, title: "Отражение света. Зеркала", tags: ["отражение", "плоское зеркало"], points: ["Угол падения равен углу отражения.", "Плоское зеркало даёт мнимое, прямое изображение.", "Есть зеркальное и диффузное отражение."] },
+      { id: 16, title: "Преломление света", tags: ["снеллиус", "полное внутреннее отражение"], points: ["При переходе между средами луч изменяет направление.", "Показатель преломления связан со скоростью света в среде.", "Полное внутреннее отражение используется в оптоволокне."] },
+      { id: 17, title: "Линзы", tags: ["фокус", "диоптрия"], points: ["Собирающие и рассеивающие линзы.", "Оптическая сила: D = 1/F.", "Формула тонкой линзы: 1/F = 1/d + 1/f."] },
+      { id: 18, title: "Глаз и фотоаппарат", tags: ["близорукость", "дальнозоркость"], points: ["Глаз фокусирует свет на сетчатке.", "Близорукость корректируют рассеивающими линзами.", "Дальнозоркость корректируют собирающими линзами.", "Фотоаппарат: объектив + матрица по аналогии с глазом."] }
+    ];
+
+    const storageKeys = {
+      theme: "physics_theme",
+      done: "physics_done"
+    };
+
+    const themeBtn = document.getElementById("themeBtn");
+    const search = document.getElementById("search");
+    const ticketsContainer = document.getElementById("tickets");
+    const nav = document.getElementById("ticketNav");
+    const progressFill = document.getElementById("progressFill");
+    const progressText = document.getElementById("progressText");
+
+    let doneTickets = new Set(JSON.parse(localStorage.getItem(storageKeys.done) || "[]"));
+
+    const setTheme = (theme) => {
+      document.documentElement.setAttribute("data-theme", theme);
+      localStorage.setItem(storageKeys.theme, theme);
+    };
+
+    const initTheme = () => {
+      const saved = localStorage.getItem(storageKeys.theme);
+      if (saved) return setTheme(saved);
+      const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setTheme(isDark ? "dark" : "light");
+    };
+
+    const updateProgress = () => {
+      const percent = Math.round((doneTickets.size / ticketsData.length) * 100);
+      progressFill.style.width = `${percent}%`;
+      progressText.textContent = `${percent}%`;
+    };
+
+    const saveDone = () => localStorage.setItem(storageKeys.done, JSON.stringify([...doneTickets]));
+
+    const render = () => {
+      const q = search.value.trim().toLowerCase();
+
+      const filtered = ticketsData.filter((t) => {
+        const text = `${t.id} ${t.title} ${t.tags.join(" ")} ${t.points.join(" ")}`.toLowerCase();
+        return text.includes(q);
+      });
+
+      ticketsContainer.innerHTML = "";
+      nav.innerHTML = "";
+
+      filtered.forEach((t) => {
+        const details = document.createElement("details");
+        details.className = "ticket";
+        details.id = `ticket-${t.id}`;
+
+        const summary = document.createElement("summary");
+        summary.innerHTML = `<span>Билет №${t.id} — ${t.title}</span><span class="ticket-meta">${t.tags.join(" • ")}</span>`;
+
+        const body = document.createElement("div");
+        body.className = "ticket-body";
+        body.innerHTML = `<ul>${t.points.map((p) => `<li>${p}</li>`).join("")}</ul>`;
+
+        const label = document.createElement("label");
+        label.className = "learned";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "checkbox";
+        checkbox.checked = doneTickets.has(t.id);
+
+        checkbox.addEventListener("change", () => {
+          if (checkbox.checked) doneTickets.add(t.id);
+          else doneTickets.delete(t.id);
+          saveDone();
+          updateProgress();
+        });
+
+        label.append(checkbox, document.createTextNode("Отметить как выученный"));
+
+        body.appendChild(label);
+        details.append(summary, body);
+        ticketsContainer.appendChild(details);
+
+        const btn = document.createElement("button");
+        btn.className = "ticket-link";
+        btn.textContent = `Билет №${t.id}`;
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".ticket-link").forEach((x) => x.classList.remove("active"));
+          btn.classList.add("active");
+          details.open = true;
+          details.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+
+        nav.appendChild(btn);
+      });
+
+      updateProgress();
+    };
+
+    document.getElementById("openAll").addEventListener("click", () => {
+      document.querySelectorAll("details.ticket").forEach((d) => (d.open = true));
     });
 
-    const data = await res.json();
-    tg.openInvoice(data.invoice_url);
-}
-</script>
+    document.getElementById("closeAll").addEventListener("click", () => {
+      document.querySelectorAll("details.ticket").forEach((d) => (d.open = false));
+    });
 
+    themeBtn.addEventListener("click", () => {
+      const current = document.documentElement.getAttribute("data-theme") || "dark";
+      setTheme(current === "dark" ? "light" : "dark");
+    });
+
+    search.addEventListener("input", render);
+
+    initTheme();
+    render();
+  </script>
 </body>
 </html>
